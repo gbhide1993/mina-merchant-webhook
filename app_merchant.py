@@ -16,7 +16,7 @@ REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
 # --- REDIS CONNECTION ---
 # This connects to the Redis instance shared with the Worker
 conn = redis.from_url(REDIS_URL)
-q = Queue(connection=conn)
+q = Queue('merchant_jobs',connection=conn)
 
 def send_ack_message(to_number, body_text):
     """
@@ -69,4 +69,5 @@ def whatsapp_webhook():
     return str(MessagingResponse())
 
 if __name__ == "__main__":
+
     app.run(host='0.0.0.0', port=5000)
