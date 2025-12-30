@@ -18,6 +18,8 @@ app = Flask(__name__)
 
 @app.route("/twilio/webhook", methods=["POST"])
 def twilio_merchant_webhook():
+    print("🔥 WEBHOOK HIT")
+    print("FORM DATA:", dict(request.form))
     form = request.values
 
     sender = form.get("From")                  # whatsapp:+91XXXXXXXXXX
@@ -71,3 +73,4 @@ def twilio_merchant_webhook():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
