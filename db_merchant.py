@@ -60,20 +60,22 @@ def get_merchant_by_id(merchant_id: int) -> dict:
 # TRANSCRIPTION JOB QUEUE
 # -------------------------
 
-def create_transcription_job(merchant_id: int, gcs_path: str) -> str:
+def create_transcription_job(merchant_id: int, phone: str, gcs_path: str) -> str:
     job_id = str(uuid.uuid4())
 
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
             """
-            INSERT INTO transcription_jobs (id, merchant_id, gcs_path, status)
-            VALUES (%s, %s, %s, 'PENDING')
+            INSERT INTO transcription_jobs
+            (id, merchant_id, phone, gcs_path, status)
+            VALUES (%s, %s, %s, %s, %s)
             """,
-            (job_id, merchant_id, gcs_path)
+            (job_id, merchant_id, phone, gcs_path, "pending")
         )
         conn.commit()
 
     return job_id
+
 
 
 def fetch_next_pending_job() -> dict | None:
