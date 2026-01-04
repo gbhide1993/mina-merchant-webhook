@@ -37,7 +37,12 @@ def twilio_merchant_webhook():
     # -------------------------
     # HANDLE VOICE NOTES ONLY
     # -------------------------
-    if media_url and media_type.startswith("audio/"):
+    print("DEBUG media_type:", media_type, "media_url:", bool(media_url))
+
+    if media_url and (
+        media_type.startswith("audio/")
+        or media_type in ("audio/ogg", "video/ogg", "application/ogg")
+    ):
         try:
             gcs_path = upload_twilio_media_to_gcs(
                 media_url=media_url,
@@ -45,14 +50,10 @@ def twilio_merchant_webhook():
                 phone=phone
             )
 
-            job_id = str(uuid.uuid4())
-
-            create_transcription_job(
-                job_id=job_id,
+            job_id = create_transcription_job(
                 merchant_id=merchant["id"],
                 phone=phone,
-                gcs_path=gcs_path,
-                status="pending"
+                gcs_path=gcs_path
             )
 
             send_whatsapp(
@@ -60,7 +61,7 @@ def twilio_merchant_webhook():
                 "🎤 Audio mil gaya.\nYaad rakh raha hoon…"
             )
 
-        except Exception as e:
+        except Exception:
             print("Merchant webhook error:", traceback.format_exc())
             send_whatsapp(
                 phone,
@@ -68,6 +69,7 @@ def twilio_merchant_webhook():
             )
 
         return ("", 204)
+
 
     # -------------------------
     # EVERYTHING ELSE: IGNORE
