@@ -2,6 +2,7 @@
 
 from flask import Flask, request
 import traceback
+import uuid
 
 from utils import send_whatsapp, upload_twilio_media_to_gcs
 from db_merchant import (
@@ -18,8 +19,6 @@ app = Flask(__name__)
 
 @app.route("/twilio/webhook", methods=["POST"])
 def twilio_merchant_webhook():
-    print("🔥 WEBHOOK HIT")
-    print("FORM DATA:", dict(request.form))
     form = request.values
 
     sender = form.get("From")                  # whatsapp:+91XXXXXXXXXX
@@ -46,9 +45,14 @@ def twilio_merchant_webhook():
                 phone=phone
             )
 
+            job_id = str(uuid.uuid4())
+
             create_transcription_job(
+                job_id=job_id,
                 merchant_id=merchant["id"],
-                gcs_path=gcs_path
+                phone=phone,
+                gcs_path=gcs_path,
+                status="pending"
             )
 
             send_whatsapp(
@@ -73,4 +77,3 @@ def twilio_merchant_webhook():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
